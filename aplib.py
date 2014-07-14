@@ -10,9 +10,10 @@ import os
 import subprocess
 import sys
 
+playbooks_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks')));
+
 def check_conf():
   # Check that the Playbook storage is set
-  playbooks_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks')));
   if(not os.path.isdir(playbooks_path)):
     return False
 
@@ -30,7 +31,9 @@ def main():
     sys.exit(errors('NO_SETUP')['code'])
 
   print sys.argv
-  subprocess.call('ansible')
+
+  subprocess.call(['ansible-playbook', playbooks_path + '/' + sys.argv[1]])
+  # subprocess.call('ansible ' + sys.argv[1])
   # print 'Number of arguments: ', len(sys.argv)
   # if len(sys.argv)>1:
   #   print '\tHello there', sys.argv[1]
@@ -40,4 +43,4 @@ def main():
 # Standard boilerplate to call the main() function to begin
 # the program.
 if __name__ == '__main__':
-    main()
+  main()
