@@ -6,14 +6,17 @@
 
 
 # import modules used here -- sys is a very standard one
-import sys
 import os
+import subprocess
+import sys
 
 def check_conf():
   # Check that the Playbook storage is set
-  playbooks_path = os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks');
+  playbooks_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks')));
   if(not os.path.isdir(playbooks_path)):
-    return 0
+    return False
+
+  return True
 
 def errors(err):
   return {
@@ -26,12 +29,13 @@ def main():
   if(not check_conf()):
     sys.exit(errors('NO_SETUP')['code'])
 
-  print 'Number of arguments: ', len(sys.argv)
-  
-  if len(sys.argv)>1:
-    print '\tHello there', sys.argv[1]
-  else:
-    print "\tHello world!"  
+  print sys.argv
+  subprocess.call('ansible')
+  # print 'Number of arguments: ', len(sys.argv)
+  # if len(sys.argv)>1:
+  #   print '\tHello there', sys.argv[1]
+  # else:
+  #   print "\tHello world!"  
 
 # Standard boilerplate to call the main() function to begin
 # the program.
