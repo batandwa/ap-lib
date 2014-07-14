@@ -6,6 +6,7 @@
 
 
 # import modules used here -- sys is a very standard one
+import glob
 import os
 import subprocess
 import sys
@@ -30,9 +31,19 @@ def main():
   if(not check_conf()):
     sys.exit(errors('NO_SETUP')['code'])
 
-  print sys.argv
+  arguments = sys.argv
+  del arguments[0];
+  
+  if(arguments[0] == '--discover'):
+    for root, dirs, files in os.walk(playbooks_path):
+      for file in files:
+        if file.endswith(".yml"):
+          print os.path.join(root, file)
+    sys.exit(0)
+    
+  arguments[0] = playbooks_path + '/' + arguments[0]
 
-  subprocess.call(['ansible-playbook', playbooks_path + '/' + sys.argv[1]])
+  subprocess.call(['ansible-playbook'] + arguments)
   # subprocess.call('ansible ' + sys.argv[1])
   # print 'Number of arguments: ', len(sys.argv)
   # if len(sys.argv)>1:
