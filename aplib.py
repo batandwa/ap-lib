@@ -24,10 +24,6 @@ def setup_arguments():
   
   parser.add_argument('operation', help='The operation to be executed')
   parser.add_argument('playbook', default='', help='The playbook to be executed.', nargs='?')
-  # parser.add_argument('--extra-vars', help='Additional arguments for ansible-playbook')
-  # parser.add_argument('-i', help='Hosts inventory file')
-
-  # args = parser.parse_args()
 
   args, extra_args = parser.parse_known_args()
   
@@ -66,14 +62,6 @@ def main():
     print ansible_cmd
 
     subprocess.call(ansible_cmd)
-  # subprocess.call('ansible ' + sys.argv[1])
-  # print 'Number of arguments: ', len(sys.argv)
-  # if len(sys.argv)>1:
-  #   print '\tHello there', sys.argv[1]
-  # else:
-  #   print "\tHello world!"  
 
-# Standard boilerplate to call the main() function to begin
-# the program.
 if __name__ == '__main__':
   main()
