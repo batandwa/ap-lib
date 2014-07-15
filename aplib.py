@@ -19,12 +19,22 @@ extra_args = None
 def setup_arguments():
   global args
   global extra_args
-  global extra_args
 
-  parser = argparse.ArgumentParser(description='An application that calls ansible-playbook and allows for a centralised playbook location.')
-  
-  parser.add_argument('operation', help='The operation to be executed')
-  parser.add_argument('playbook', default='', help='The playbook to be executed.', nargs='?')
+  # create the top-level parser
+  parser = argparse.ArgumentParser(description='An application that calls ansible-playbook and allows for a centralised playbook location.', prog=os.path.basename(__file__))
+  subparsers = parser.add_subparsers(help='The operation to be executed')
+ 
+# -  parser.add_argument('operation', help='The operation to be executed')
+# -  parser.add_argument('playbook', default='', help='The playbook to be executed.', nargs='?')
+
+  # create the parser for the "a" command
+  parser_a = subparsers.add_parser('play', help='Execute a playbook')
+  parser_a.add_argument('playbook', help='The playbook to be executed')
+  parser_a.set_defaults(operation='play')
+
+  # create the parser for the "b" command
+  parser_b = subparsers.add_parser('search', help='Search for a playbook or role in our library')
+  parser_b.set_defaults(operation='search')
 
   args, extra_args = parser.parse_known_args()
   
