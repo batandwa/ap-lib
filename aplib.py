@@ -69,14 +69,14 @@ def main():
     print 'Error with environment setup.'
     sys.exit(errors('NO_SETUP')['code'])
 
-  if(args.operation == 'discover'):
+  if(args.operation == 'search'):
     for root, dirs, files in os.walk(playbooks_path):
       for file in files:
         if file.endswith(".yml"):
           print os.path.join(root, file).replace(playbooks_path, '').lstrip('/')
     sys.exit(0)
 
-  if(args.operation == 'run'):
+  if(args.operation == 'play'):
     ansible_cmd = ['ansible-playbook', playbooks_path + '/' + args.playbook] + extra_args
     print ansible_cmd
 
