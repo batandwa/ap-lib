@@ -39,7 +39,7 @@ def errors(err):
   return {
     'NO_PLAYBOOK_DIR': {'code': 1, 'title': 'Playbook directory does not exist.'},
     'NO_SETUP': {'code': 2, 'title': 'Playbook directory does not exist.'},
-    'NO_HOSTS_PATH_DECLARATION': {'code': 4, 'title': 'There was an error in the hosts file declaration.'}
+    'HOSTS_PATH_DECLARATION': {'code': 4, 'title': 'There was an error in the hosts file declaration.'}
   }[err]
 
 def check_hosts_file():
@@ -51,15 +51,11 @@ def check_hosts_file():
   if hosts_path_arg in extra_args:
     arg_hosts_path_id = extra_args.index(hosts_path_arg) + 1
     if extra_args[arg_hosts_path_id] == None:
-      sys.exist(errors('NO_HOSTS_PATH_DECLARATION'))
-    # return extra_args[arg_hosts_path_id]
+      sys.exist(errors('HOSTS_PATH_DECLARATION'))
   elif os.path.isfile(cur_path + '/hosts'):
     extra_args += ['-i', cur_path + '/hosts']
     print extra_args
-    return cur_path + '/hosts'
-  else:
-    return None
-
+    
 
 def main():
   setup_arguments()
