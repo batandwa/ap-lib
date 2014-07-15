@@ -56,14 +56,19 @@ def check_hosts_file():
   global extra_args
 
   hosts_path_arg = '-i'
-  cur_path = os.getcwd()
+  cur_path_hosts = os.getcwd() + '/hosts'
+
 
   if hosts_path_arg in extra_args:
     arg_hosts_path_id = extra_args.index(hosts_path_arg) + 1
     if extra_args[arg_hosts_path_id] == None:
       sys.exist(errors('HOSTS_PATH_DECLARATION'))
-  elif os.path.isfile(cur_path + '/hosts'):
-    extra_args += [hosts_path_arg, cur_path + '/hosts']
+    return extra_args[arg_hosts_path_id]
+  elif os.path.isfile(cur_path_hosts):
+    extra_args += [hosts_path_arg, cur_path_hosts]
+    return cur_path_hosts
+  else:
+    return None
 
 def main():
   setup_arguments()
@@ -71,7 +76,13 @@ def main():
   global args
   global extra_args
 
-  check_hosts_file()
+  hosts = check_hosts_file()
+  if hosts:
+    print 'Using hosts file located at %s' % hosts
+    print
+  else:
+    print 'Using default system hosts file'
+    print
 
   if(not check_conf()):
     print 'Error with environment setup.'
@@ -86,8 +97,6 @@ def main():
 
   if(args.operation == 'play'):
     ansible_cmd = ['ansible-playbook', playbooks_path + '/' + args.playbook] + extra_args
-    print ansible_cmd
-
     subprocess.call(ansible_cmd)
 
 if __name__ == '__main__':
