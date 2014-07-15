@@ -25,6 +25,9 @@ def setup_arguments():
  
   # Create the parser for the "play" command.
   parser_play = subparsers.add_parser('play', help='Execute a playbook')
+
+  # We explicitly add playbook as an argument here (instead of leaving to be handle as an addtional argument)
+  # so that we can check for the playbook in multiple locations
   parser_play.add_argument('playbook', help='The playbook to be executed')
   parser_play.set_defaults(operation='play')
 
@@ -92,10 +95,8 @@ def main():
   hosts = check_hosts_file()
   if hosts:
     print 'Using hosts file located at %s' % hosts
-    print
   else:
     print 'Using default system hosts file'
-    print
 
   # If there is an issue with the confguration and/or arguments.
   if(not check_conf()):
@@ -112,7 +113,17 @@ def main():
 
   # Handle playbook operations
   if(args.operation == 'play'):
-    ansible_cmd = ['ansible-playbook', playbooks_path + '/' + args.playbook] + extra_args
+    # List the available playbook paths
+    playbook_paths = [os.getcwd(), playbooks_path]
+
+    # Pick the first available path
+    for loc_path in playbook_paths:
+      if os.path.isfile(loc_path + '/' + args.playbook):
+        break
+      
+    ansible_cmd = ['ansible-playbook', loc_path + '/' + args.playbook] + extra_args
+    print 'Running: ' + ' '.join(ansible_cmd)
+    print
     subprocess.call(ansible_cmd)
 
 if __name__ == '__main__':
