@@ -28,13 +28,13 @@ def setup_arguments():
 # -  parser.add_argument('playbook', default='', help='The playbook to be executed.', nargs='?')
 
   # create the parser for the "a" command
-  parser_a = subparsers.add_parser('play', help='Execute a playbook')
-  parser_a.add_argument('playbook', help='The playbook to be executed')
-  parser_a.set_defaults(operation='play')
+  parser_play = subparsers.add_parser('play', help='Execute a playbook')
+  parser_play.add_argument('playbook', help='The playbook to be executed')
+  parser_play.set_defaults(operation='play')
 
   # create the parser for the "b" command
-  parser_b = subparsers.add_parser('search', help='Search for a playbook or role in our library')
-  parser_b.set_defaults(operation='search')
+  parser_search = subparsers.add_parser('search', help='Search for a playbook or role in our library')
+  parser_search.set_defaults(operation='search')
 
   args, extra_args = parser.parse_known_args()
   
