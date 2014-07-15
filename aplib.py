@@ -53,9 +53,7 @@ def check_hosts_file():
     if extra_args[arg_hosts_path_id] == None:
       sys.exist(errors('HOSTS_PATH_DECLARATION'))
   elif os.path.isfile(cur_path + '/hosts'):
-    extra_args += ['-i', cur_path + '/hosts']
-    print extra_args
-    
+    extra_args += [hosts_path_arg, cur_path + '/hosts']
 
 def main():
   setup_arguments()
