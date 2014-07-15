@@ -13,19 +13,23 @@ import sys
 
 playbooks_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks')))
 args = None
-unknown_args = None
+extra_args = None
 
 def setup_arguments():
   global args
-  global unknown_args
+  global extra_args
+  global extra_args
 
   parser = argparse.ArgumentParser(description='An application that calls ansible-playbook and allows for a centralised playbook location.')
-  # known_arguments = []
-  parser.add_argument('--discover', action='store_false', default=False, help='List playbooks that exist in the library path.')
-  # known_arguments.push('--discover')
-  parser.add_argument('playbook', help='The playbook to be executed.')
-  args, unknown_args = parser.parse_known_args(['--discover', 'playbook'])
+  
+  parser.add_argument('operation', help='The operation to be executed')
+  parser.add_argument('playbook', default='', help='The playbook to be executed.', nargs='?')
+  # parser.add_argument('--extra-vars', help='Additional arguments for ansible-playbook')
+  # parser.add_argument('-i', help='Hosts inventory file')
 
+  # args = parser.parse_args()
+
+  args, extra_args = parser.parse_known_args()
   
 def check_conf():
   # Check that the Playbook storage is set
@@ -44,20 +48,24 @@ def errors(err):
 def main():
   setup_arguments()
   global args
+  global extra_args
 
   if(not check_conf()):
+    print 'Error with environment setup.'
     sys.exit(errors('NO_SETUP')['code'])
 
-  print args
-  if(args.discover):
-    print 'Here'
-    # for root, dirs, files in os.walk(playbooks_path):
-    #   for file in files:
-    #     if file.endswith(".yml"):
-          # print os.path.join(root, file).replace(playbooks_path, '').lstrip('/')
+  if(args.operation == 'discover'):
+    for root, dirs, files in os.walk(playbooks_path):
+      for file in files:
+        if file.endswith(".yml"):
+          print os.path.join(root, file).replace(playbooks_path, '').lstrip('/')
     sys.exit(0)
 
-  subprocess.call(['ansible-playbook', playbooks_path + '/' + args.playbook])
+  if(args.operation == 'run'):
+    ansible_cmd = ['ansible-playbook', playbooks_path + '/' + args.playbook] + extra_args
+    print ansible_cmd
+
+    subprocess.call(ansible_cmd)
   # subprocess.call('ansible ' + sys.argv[1])
   # print 'Number of arguments: ', len(sys.argv)
   # if len(sys.argv)>1:
