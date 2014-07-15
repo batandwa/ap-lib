@@ -35,6 +35,10 @@ def setup_arguments():
   parser_search = subparsers.add_parser('search', help='Search for a playbook or role in our library')
   parser_search.set_defaults(operation='search')
 
+  parser_galaxy = subparsers.add_parser('galaxy', help='A proxy command of ansible galaxy')
+  parser_galaxy.set_defaults(operation='galaxy')
+
+
   # Get the arguments and additional arguments.
   args, extra_args = parser.parse_known_args()
   
@@ -125,6 +129,13 @@ def main():
     print 'Running: ' + ' '.join(ansible_cmd)
     print
     subprocess.call(ansible_cmd)
+
+  if args.operation == 'galaxy':
+    ansible_cmd = ['ansible-galaxy', '--roles-path=' + roles_path] + extra_args
+    print 'Running: ' + ' '.join(ansible_cmd)
+    print
+    subprocess.call(ansible_cmd)
+
 
 if __name__ == '__main__':
   main()
