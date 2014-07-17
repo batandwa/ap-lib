@@ -5,6 +5,7 @@ import argparse
 import os
 import subprocess
 import sys
+import tempfile
 
 # Set some defaults for the app.
 playbooks_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks')))
@@ -35,9 +36,12 @@ def setup_arguments():
   parser_search = subparsers.add_parser('search', help='Search for a playbook or role in our library')
   parser_search.set_defaults(operation='search')
 
-  parser_galaxy = subparsers.add_parser('galaxy', help='A proxy command of ansible galaxy')
+  parser_galaxy = subparsers.add_parser('galaxy', help='A proxy command of Ansible Galaxy')
   parser_galaxy.set_defaults(operation='galaxy')
 
+  parser_playgal = subparsers.add_parser('playgal', help='Play an Ansible Galaxy role')
+  parser_playgal.set_defaults(operation='playgal')
+  parser_playgal.add_argument('role', help='The role to be execute')
 
   # Get the arguments and additional arguments.
   args, extra_args = parser.parse_known_args()
@@ -55,7 +59,8 @@ def errors(err):
   return {
     'NO_PLAYBOOK_DIR': {'code': 1, 'title': 'Playbook directory does not exist.'},
     'NO_SETUP': {'code': 2, 'title': 'Playbook directory does not exist.'},
-    'HOSTS_PATH_DECLARATION': {'code': 4, 'title': 'There was an error in the hosts file declaration.'}
+    'HOSTS_PATH_DECLARATION': {'code': 4, 'title': 'There was an error in the hosts file declaration.'},
+    'ROLE_NOT_FOUND': {'code': 8, 'title': 'Could not find role.'}
   }[err]
 
 # Check if the hosts file exists and returns it's name if it's not the system hosts file.
@@ -88,6 +93,14 @@ def check_hosts_file():
   # If none was passed and there isn't one in the current directory.
   else:
     return None
+
+def role_path(role):
+  role_lib_paths = [os.getcwd() + '/' + role, roles_path + '/' + role]
+  for path in role_lib_paths:
+    if os.path.isfile(path) or os.path.isdir(path):
+      return path
+
+  return None
 
 def main():
   setup_arguments()
@@ -132,6 +145,34 @@ def main():
 
   if args.operation == 'galaxy':
     ansible_cmd = ['ansible-galaxy', '--roles-path=' + roles_path] + extra_args
+    print 'Running: ' + ' '.join(ansible_cmd)
+    print
+    subprocess.call(ansible_cmd)
+
+  if args.operation == 'playgal':
+    found_role_path = role_path(args.role)
+
+    if found_role_path == None:
+      err = errors('ROLE_NOT_FOUND')
+      print err['title']
+      sys.exit(err['code'])
+
+    play = \
+"""
+- hosts: all
+  roles:
+  - { role: %s }
+
+"""
+    tf = tempfile.NamedTemporaryFile()
+    tf.name
+
+    playbook_f = tempfile.NamedTemporaryFile(prefix='aplib_', suffix='.yml', dir='/tmp', delete=False)
+    playbook_f.write(play % found_role_path)
+    playbook_f.flush()
+     
+    
+    ansible_cmd = ['ansible-playbook', playbook_f.name] + extra_args
     print 'Running: ' + ' '.join(ansible_cmd)
     print
     subprocess.call(ansible_cmd)
