@@ -3,6 +3,7 @@
 # import modules used here -- sys is a very standard one.
 import argparse
 import os
+import string
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,7 @@ import tempfile
 # Set some defaults for the app.
 playbooks_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks')))
 roles_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_ROLES_PATH', '~/.ansible/roles')))
+script_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/'
 
 # So that all functions have accesss.
 args = None
@@ -157,21 +159,17 @@ def main():
       print err['title']
       sys.exit(err['code'])
 
-    play = \
-"""
-- hosts: all
-  roles:
-  - { role: %s }
-
-"""
     tf = tempfile.NamedTemporaryFile()
     tf.name
 
+    playgal_template = open(script_dir_path + 'playgal.yml.tpl')
+    playgal_template_src = string.Template(playgal_template.read())
+    play = playgal_template_src.substitute({'roles': found_role_path})
+
     playbook_f = tempfile.NamedTemporaryFile(prefix='aplib_', suffix='.yml', dir='/tmp', delete=False)
-    playbook_f.write(play % found_role_path)
+    playbook_f.write(play)
     playbook_f.flush()
      
-    
     ansible_cmd = ['ansible-playbook', playbook_f.name] + extra_args
     print 'Running: ' + ' '.join(ansible_cmd)
     print
