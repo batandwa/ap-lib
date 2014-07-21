@@ -7,6 +7,9 @@ import string
 import subprocess
 import sys
 import tempfile
+import yaml
+
+from itertools import chain
 
 # Set some defaults for the app.
 playbooks_path = os.path.realpath(os.path.expanduser(os.getenv('APLIB_PLAYBOOK_PATH', '~/.ansible/playbooks')))
@@ -140,7 +143,22 @@ def main():
       if os.path.isfile(loc_path + '/' + args.playbook):
         break
       
-    ansible_cmd = ['ansible-playbook', loc_path + '/' + args.playbook] + extra_args
+    full_playbook_path = loc_path + '/' + args.playbook
+
+    if os.path.isfile(os.getcwd() + '/vars.yml'):
+      print 'vars.yml file found'
+      vars_template = open(os.getcwd() + '/vars.yml')
+      file_vars_list = yaml.load(vars_template)
+      file_vars = ''
+      for vars_item in file_vars_list:
+        print file_vars_list[vars_item]
+        file_vars += vars_item + '=' + file_vars_list[vars_item] + ' '
+      print file_vars
+
+    else:
+      print 'No vars.yml detected'
+
+    ansible_cmd = ['ansible-playbook', full_playbook_path] + extra_args
     print 'Running: ' + ' '.join(ansible_cmd)
     print
     subprocess.call(ansible_cmd)
@@ -155,12 +173,16 @@ def main():
     found_role_path = role_path(args.role)
 
     if found_role_path == None:
-      err = errors('ROLE_NOT_FOUND')
-      print err['title']
-      sys.exit(err['code'])
-
-    tf = tempfile.NamedTemporaryFile()
-    tf.name
+      #  Try and install it
+      ansible_cmd = ['ansible-galaxy', '--roles-path=' + roles_path, 'install', args.role]
+      print 'Running: ' + ' '.join(ansible_cmd)
+      subprocess.call(ansible_cmd)
+      
+      found_role_path = role_path(args.role)
+      if found_role_path == None:
+        err = errors('ROLE_NOT_FOUND')
+        print err['title']
+        sys.exit(err['code'])
 
     playgal_template = open(script_dir_path + 'playgal.yml.tpl')
     playgal_template_src = string.Template(playgal_template.read())
@@ -174,7 +196,6 @@ def main():
     print 'Running: ' + ' '.join(ansible_cmd)
     print
     subprocess.call(ansible_cmd)
-
 
 if __name__ == '__main__':
   main()
