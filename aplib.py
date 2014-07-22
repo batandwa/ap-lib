@@ -147,13 +147,20 @@ def main():
 
     if os.path.isfile(os.getcwd() + '/vars.yml'):
       print 'vars.yml file found'
-      vars_template = open(os.getcwd() + '/vars.yml')
-      file_vars_list = yaml.load(vars_template)
-      file_vars = ''
-      for vars_item in file_vars_list:
-        print file_vars_list[vars_item]
-        file_vars += vars_item + '=' + file_vars_list[vars_item] + ' '
-      print file_vars
+
+
+
+
+      playgal_template = open(script_dir_path + 'vars_include.yml.tpl')
+      playgal_template_src = string.Template(playgal_template.read())
+      play = playgal_template_src.substitute({'playbook': full_playbook_path, 'variables_file': os.getcwd() + '/vars.yml'})
+
+      playbook_f = tempfile.NamedTemporaryFile(prefix='aplib_', suffix='.yml', dir='/tmp', delete=False)
+      playbook_f.write(play)
+      playbook_f.flush()
+
+      full_playbook_path = playbook_f.name
+
 
     else:
       print 'No vars.yml detected'
